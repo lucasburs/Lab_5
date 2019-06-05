@@ -1,0 +1,52 @@
+%% Equations File "eqns_121lab4.m"
+
+function ds = Lab5_EME121_eqs(t, s, p)
+
+% Input system parameters
+ 
+% t = time
+% s = states vector
+% ds = derivative of states
+% p = vector of parameters
+
+% Parameter unpack
+a = p(1);
+b = p(2);
+k_f = p(3);
+k_r = p(4);
+C_f = p(5);
+C_r = p(6);
+m = p(7);
+J = p(8);
+U = p(9);
+delta_0 = p(10);
+w_in = p(11);
+
+% State Unpack
+y_f = s(1);
+y_r = s(2);
+V = s(3);
+omega_y = s(4);
+x = s(5);
+y = s(6);
+theta_y = s(7);
+
+% Finding Delta:
+delta = delta_0; % Step input
+
+
+% Solving for derivatives:
+y_f_dot = V + a*omega_y - U*((k_f * y_f)/C_f - delta);
+y_r_dot = V - b*omega_y - (k_r*y_r*U)/C_r;
+V_dot = ((-k_f * y_f - k_r * y_r)/m) - U *omega_y;
+omega_y_dot = (b*k_r*y_r - a*k_f*y_f)/ J; 
+
+% Preparing Extra Outputs ( Trajectory of system)
+x_dot = U * cos(theta_y) - V * sin(theta_y);
+y_dot = U * sin(theta_y) + V * cos(theta_y);
+theta_y_dot = omega_y;
+
+% Packing Derivatives:
+ds = [y_f_dot, y_r_dot, V_dot, omega_y_dot, x_dot, y_dot, theta_y_dot]';
+
+end
