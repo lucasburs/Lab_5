@@ -1,0 +1,122 @@
+%%    *Lab #5 : Vehicle With Sideways Compliance of Tires *
+%
+%                           Abhyuday Kaushik, Lucas Burstein, Raven Laddish
+%                                                             June. 7. 2019
+%
+%%
+%
+%
+%
+%
+%
+%
+%
+% 
+%
+%
+% 
+
+%% Master File "master_121lab5.m"
+
+% Cleanup
+clear all
+close all
+clc
+
+%% Input
+
+% Parmaters:
+g=9.8;
+m=3600/2.2;
+L=7*.3048; %wheelbase
+ab=0.85; % a/b
+b=L/(1+ab);
+a=L-b;
+J=.5*m*a*b; %yaw moment of inertia
+%below used to set C_f
+alfaf_max=7*pi/180;
+alat_max=.7*g;
+C_f=b/(a+b)*m*alat_max/alfaf_max;
+U_mph=50.;
+U=U_mph*.45; %forward velocity, m/s
+K_u=1.1; %An understeer coefficient used to calculate C_r
+C_r=K_u*ab*C_f;
+%imagine that a wheel weighs 20 lb
+%define a frequency
+m_w=20/2.2;
+f = 50; % Input added to see when system becomes unstable (Hz)
+w_wh=2*pi*f;
+k_f=m_w*w_wh^2;
+k_r=k_f;
+delta_0=2*pi/180; %used for step steer and for magnitude for frequency input
+w_in=2*pi*1; %Frequency of sin wave input
+
+
+% Initial Conditions: Assuming all initial conditions are 0
+y_f_0 = 0;
+y_r_0 = 0;
+V_0 = 0;
+omega_y_0 = 0; 
+x_0 = 0; % Used to find trahectory of C.G.
+y_0= 0;  % Used to find trahectory of C.G.
+theta_y_0 = 0; % Used to find trahectory of C.G.
+
+p = [a, b, k_f, k_r, C_f, C_r, m, J, U, delta_0, w_in]; % Packing Parameters
+s_0 = [y_f_0, y_r_0, V_0, omega_y_0, x_0, y_0, theta_y_0]; % Packing Initial Conditions
+
+%% Time Vector
+ts = linspace(0,100,1000);
+
+%% Creating Function Handle for input to ode45
+f_anon = @(t,s) Lab5_EME121_eqs(t, s, p); 
+% Only changing t and x and not r and p
+%% Solve
+[ts, xs] = ode45(f_anon, ts, s_0); 
+% solves ODEs from t0 to tf with an initial state of x0
+% xs is a matrix with initial conditions in the first row and then the
+% values until t = final time
+
+% Each Column is the solutions for a given variable at the different times
+y_f = xs(:,1);
+y_r = xs(:,2);
+V = xs(:,3);
+omega_y = xs(:,4);
+x = xs(:,5);
+y = xs(:,6);
+theta_y = xs(:,7);
+
+% ds = zeros(length(ts), 6);
+% ext = zeros(length(ts), 1);
+% %This loop extracts information from the equation file (Input Torque)
+% for i = 1:length(ts)
+%   [ds(i,:),ext(i)] = Lab4_EME121_eqs(ts(i), xs(i,:), p);
+% end
+
+
+%% Plots
+
+figure(1)
+plot(ts, y_f)
+
+figure(2)
+plot(ts, y_r)
+
+figure(3)
+plot(ts, V)
+
+figure(4)
+plot(ts, omega_y)
+
+figure(5)
+plot(ts, x)
+title('X - Direction Trajectory')
+
+figure(6)
+plot(ts, y)
+title('Y - Direction Trajectory')
+figure(7)
+plot(ts, theta_y)
+
+figure(7)
+plot(x, y)
+
